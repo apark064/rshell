@@ -16,22 +16,22 @@ RShell is a command shell written in C++ that is able to execute commands read f
 # Classes
 This is a description of every class.
 
-##Interpreter
+## Interpreter
 This is an interpreter
 
-##Word
+## Word
 This is a word
 
-###Command
+### Command
 This is a command
 
-####Exec
+#### Exec
 This is an exec (excecutable)
 
-####Arg
+#### Arg
 This is an arg (argument)
 
-###Connector
+### Connector
 This is a connector
 
 # Prototypes/Research
