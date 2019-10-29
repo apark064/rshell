@@ -9,7 +9,7 @@ RShell is a command shell written in C++ that is able to execute commands read f
 > TODO: Need design patterns, how inputs are taken and processed
 
 # Diagram
-[OMT_DIAGRAM]: images/OMT_diagram2.jpg "OMT Diagram"
+[OMT_DIAGRAM]: images/diagram3.jpg "OMT Diagram"
 
 ![alt-text][OMT_DIAGRAM]
 
