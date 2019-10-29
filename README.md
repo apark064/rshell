@@ -18,23 +18,36 @@ This is a description of every class.
 
 ## Interpreter
 Handles all user input. Reads an inputted string and runs system executables based off of the formatting of the input. (See below)
+
 > $ \[command\] \[arguments for command, seperated by whitespace\]
+
 If the inputted string contains a '#', then it will ignore any words after the '#', treating them as comments.
 You can chain additional commands by either ending the last input word with a ";" and inputing a new command, or by inputting an additional connector, (&& or ||)
 The interpreter will loop input and output until the user types in 'exit'
 ### How it works
 Specifically, the interpretor 'divides' the string into 'word' objects by whitespace.
 Every new user command interpreted by the interpreter is appended to the interpreter's sequence vector as a Command object with an Exec object. 
+
 > Interpreter Sequence: \[command0\]
+
 > command0 Sequence: \[exec0\]
+
 If the user specifies additional arguments in the string, they will be interpreted as Arg objects and be appended to the arguments vector of the last Command object.
+
 > Interpreter Sequence: \[command0\]
+
 > command0 Sqeuence: \[exec0, arg00, arg01\]
+
 If a new command is added to the user input via a connector (;, &&, ||), the interpreter will append a Connector object and then a new Command object with an Exec object. It will also append additional arguments if specified.
+
 > Interpreter Seqeunce: \[command0, connector0, command1, connector1, command2\]
+
 > command0 Sequence: \[exec0, arg00, arg01\]
+
 > command1 Sequence: \[exec1, arg10, arg11, arg12\]
+
 > command2 Sequence: \[exec2\]
+
 This interpretation process continues until the interpreter reaches the end of the user string.
 
 Once the interpreter reaches the end of the user string, it will execute every command in it's sequence vector. After a command is executed, it's respective Command is popped from the vector.
