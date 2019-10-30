@@ -15,7 +15,6 @@ The shell utilizes the composite design pattern. The interpreter class handles u
 ![alt-text][OMT_DIAGRAM]
 
 # Classes
-This is a description of every class.
 
 ### Interpreter
 Handles all user input. Reads an inputted string and runs system executables based off of the formatting of the input. (See below)
@@ -73,7 +72,10 @@ Connector objects are appended into the interpretor's sequence as 'seperator' ob
 When the interpretor reaches a connector in the execution sequence, it simply pops it.
 
 # Prototypes/Research
-> TODO: Test function
+The prototype code of this project is found within the prototype directory. There are two files: a prototype.c file where syscalls are tested to see how they function; a parser.cpp file where a prototype parser is tested to be used in this project. 
+
+The syscalls will be used to run any executable commands in the background while the interactive shell stays active. The parser function will use the strtok() function from the C standard library. The parser will detect the user input for any commands and arguments along with any possible connectors and comments that could be inputted at once. 
+
 
 # Development and Testing Roadmap
 1. - [ ] Create Word base class
@@ -83,5 +85,3 @@ When the interpretor reaches a connector in the execution sequence, it simply po
 1. - [ ] Create Interpreter class
 1. - [ ] Create Parser 
 1. - [ ] Create unit tests 
-
-> TODO: Need a list of tasks
