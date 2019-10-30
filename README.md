@@ -10,7 +10,7 @@ RShell is a command shell written in C++ that is able to execute commands read f
 The shell utilizes the composite design pattern. The interpreter class handles user input with the Word base class handling all strings of the input. A Command subclass reads in an executable object to be run along with any optional agruments objects. A connector subclass recognizes any connectors and is able to separate multiple commands. 
 
 # Diagram
-[OMT_DIAGRAM]: images/OMT_diagram2.jpg "OMT Diagram"
+[OMT_DIAGRAM]: images/diagram3.jpg "OMT Diagram"
 
 ![alt-text][OMT_DIAGRAM]
 
