@@ -13,7 +13,7 @@ int main(){
     int num_or = 0;
     int num_and = 0;
     int word = 0;
-
+     
     while (token != NULL){
         if(token == "||"){
             num_or++;
@@ -22,8 +22,8 @@ int main(){
         } else {
             word++;
         }
-        // std::cout << token << std::endl;
-        // token = std::strtok(NULL, " ");
+        std::cout << token << std::endl;
+        token = std::strtok(NULL, " ");
     }
     std::cout << "Number of ||: " << num_or << std::endl;
     std::cout << "Number of &&: " << num_and << std::endl;
