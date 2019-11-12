@@ -27,5 +27,31 @@ TEST(EchoTest, EchoSingleArg) {
     EXPECT_EQ(1, 1);
 }
 
+TEST(lsTest, lsWorkingDir) {
+    vector<Word*> testSequence;
+
+    Exec* test_exec = new Exec("ls");
+    testSequence.push_back(test_exec);
+
+    Command* test_command = new Command(testSequence);
+    
+    test_command->execute();
+    EXPECT_EQ(1, 1);
+}
+
+TEST(gitTest, gitStatus) {
+    vector<Word*> testSequence;
+
+    Exec* test_exec = new Exec("git");
+    testSequence.push_back(test_exec);
+
+    Arg* test_arg = new Arg("status");
+    testSequence.push_back(test_arg);
+
+    Command* test_command = new Command(testSequence);
+    
+    test_command->execute();
+    EXPECT_EQ(1, 1);
+}
 
 #endif __TEST_COMMAND_HPP__
