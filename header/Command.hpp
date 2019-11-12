@@ -29,7 +29,7 @@ class Command: public Word {
 		pid_t pid = fork();
 		if (pid == 0){ //if child process
 			char *argv[sequence.size() + 1]; //create a char-pointer array
-			for (int i = 0; i < 3; i++){
+			for (int i = 0; i < sequence.size(); i++){
 				argv[i] = const_cast<char*>(sequence.at(i)->get_word().c_str()); //move the pointers over. 
 			}
 			argv[sequence.size()] = NULL; //terminate with NULL
