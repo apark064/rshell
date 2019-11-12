@@ -27,6 +27,7 @@ class Command: public Word {
 	std::string get_word(){return this->word;};
 	void execute(){
 		pid_t pid = fork();
+		int status;
 		if (pid == 0){ //if child process
 			char *argv[sequence.size() + 1]; //create a char-pointer array
 			for (int i = 0; i < sequence.size(); i++){
@@ -35,7 +36,7 @@ class Command: public Word {
 			argv[sequence.size()] = NULL; //terminate with NULL
 		    	execvp(argv[0],argv);
 		} else{
-			while (wait(0) > 0){ ; } //wait until child process is done
+			if (waitpid(pid,&status,0) > 0){;} //wait until child process is done
 		}
 	};
         
