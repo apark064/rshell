@@ -11,6 +11,7 @@ class Arg : public Word {
 
     public:
         Arg() {};
+	Arg(std::string word){this->word = word;};
         
 };
 #endif //__ARG__HPP__

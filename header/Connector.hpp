@@ -11,6 +11,7 @@ class Connector : public Word {
 
     public:
         Connector() {};
+        Connector(std::string word){this->word = word;};
         
 };
 #endif //__CONNECTOR__HPP__
