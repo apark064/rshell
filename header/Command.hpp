@@ -5,6 +5,8 @@
 #include <vector>
 
 #include <unistd.h>
+#include <cstring>
+#include <sys/wait.h>
 
 #include "Word.hpp"
 #include "Exec.hpp"
@@ -22,15 +24,19 @@ class Command: public Word {
     public:
         Command() {};
 	Command(vector<Word*> sequence){this->sequence = sequence;};
+	std::string get_word(){return this->word;};
 	void execute(){
-		string line = "";
-		for (auto it = this->sequence.begin(); it != this->sequence.end(); it++){
-			line.append((*it)->word); //word is protected so it should be accessible
-			line.append(" "); //add a space
+		pid_t pid = fork();
+		if (pid == 0){ //if child process
+			char *argv[sequence.size() + 1]; //create a char-pointer array
+			for (int i = 0; i < 3; i++){
+				argv[i] = const_cast<char*>(sequence.at(i)->get_word().c_str()); //move the pointers over. 
+			}
+			argv[sequence.size()] = NULL; //terminate with NULL
+		    	execvp(argv[0],argv);
+		} else{
+			while (wait(0) > 0){ ; } //wait until child process is done
 		}
-		line.erase(line.end()); //delete the trailing space at the end
-		char* args[] = {"/bin/bash", "-c", line, NULL};
-        	execvp(args[0], args);
 	};
         
 };

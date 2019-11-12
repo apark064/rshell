@@ -9,6 +9,7 @@ class Word {
 
     public:
         Word() {};
-        
+	Word(std::string word);
+        virtual std::string get_word() = 0;
 };
 #endif //__WORD__HPP__

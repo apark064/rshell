@@ -11,6 +11,7 @@ class Exec : public Word {
 
     public:
         Exec() {};
-        
+        Exec(std::string word){this->word = word;};
+	std::string get_word(){return this->word;};
 };
 #endif //__EXEC__HPP__
