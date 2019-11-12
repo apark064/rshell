@@ -25,7 +25,7 @@ class Command: public Word {
 	void execute(){
 		string line = "";
 		for (auto it = this->sequence.begin(); it != this->sequence.end(); it++){
-			line.append(((*it)->word); //word is protected so it should be accessible
+			line.append((*it)->word); //word is protected so it should be accessible
 			line.append(" "); //add a space
 		}
 		line.erase(line.end()); //delete the trailing space at the end
