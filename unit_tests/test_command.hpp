@@ -20,7 +20,22 @@ TEST(EchoTest, EchoSingleArg) {
 
     Arg* test_arg = new Arg("test");
     testSequence.push_back(test_arg);
+    
+    Command* test_command = new Command(testSequence);
+    
+    test_command->execute();
+    EXPECT_EQ(1, 1);
+}
 
+TEST(catTest, catMainDirFilet) {
+    vector<Word*> testSequence;
+
+    Exec* test_exec = new Exec("cat");
+    testSequence.push_back(test_exec);
+
+    Arg* test_arg = new Arg("test_cat.txt");
+    testSequence.push_back(test_arg);
+    
     Command* test_command = new Command(testSequence);
     
     test_command->execute();
