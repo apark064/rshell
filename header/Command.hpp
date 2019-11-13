@@ -41,7 +41,14 @@ class Command: public Word {
 				
 			}
 		}
-	};
+	}
+	void add_word(Word* new_word){
+		//update the word string of the command object
+		this->word.append(new_word->get_word());
+		this->word.append(" "); //and a space
+		//push the word object into the sequence
+		this->sequence.push_back(new_word);
+	}
         
 };
 #endif //__COMMAND_HPP__
