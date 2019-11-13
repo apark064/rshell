@@ -35,7 +35,7 @@ class Command: public Word {
 			}
 			argv[sequence.size()] = NULL; //terminate with NULL
 		    	execvp(argv[0],argv);
-		} else{
+		} else {
 			if (waitpid(pid,&status,0) > 0){;} //wait until child process is done
 			if (WIFEXITED(status) && !WEXITSTATUS(status)){ //if child process successfully ended
 				
