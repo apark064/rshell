@@ -25,7 +25,7 @@ class Command: public Word {
         Command() {};
 	Command(vector<Word*> sequence){this->sequence = sequence;};
 	std::string get_word(){return this->word;};
-	void execute(){
+	int execute(){ //returns 0 if successful. returns 1 if failed
 		pid_t pid = fork();
 		int status;
 		if (pid == 0){ //if child process
@@ -38,14 +38,19 @@ class Command: public Word {
 		} else {
 			if (waitpid(pid,&status,0) > 0){;} //wait until child process is done
 			if (WIFEXITED(status) && !WEXITSTATUS(status)){ //if child process successfully ended
-				
+				return 0;	
+			} else {
+				//cout << "failed" << endl;
+				return 1;
 			}
 		}
 	}
 	void add_word(Word* new_word){
+		if (word.size() !=0 ){
+		    this->word.append(" ");
+		}
 		//update the word string of the command object
 		this->word.append(new_word->get_word());
-		this->word.append(" "); //and a space
 		//push the word object into the sequence
 		this->sequence.push_back(new_word);
 	}
