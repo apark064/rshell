@@ -85,11 +85,7 @@ class Interpreter {
 			        //HANDLING FOR NORMAL WORDS
 			        else {
 		    	            if (wordCount == 0){ //APPENED A EXEC
-					if (token == "exit"){ //EXIT CONDITION. EXIT RSHELL
-					    return 1;
-					} else {
-					    command->add_word(new Exec(token));
-					}
+					command->add_word(new Exec(token));
 				    	//std::cout << "\"" << token << "\" was appended as an EXEC" << std::endl;
 				    } else { //APPEND AN ARG
 					command->add_word(new Arg(token));
@@ -129,9 +125,34 @@ class Interpreter {
 	    word_list.push_back(command); //push the last command in
 	    ignore = false;
 	    //EXECUTE COMMANDS
+	    int prevExecute = 0; //updates based on the previous execute()
+	    bool ignore2 = false; //if true, ignores the next command
 	    for (auto it = word_list.begin(); it != word_list.end(); it++){
-		//std::cout << (*it)->get_word() << std::endl;
-		dynamic_cast<Command*>(*it)->execute();		
+		if ((*it)->get_word() == "&&"){ //if the current word is an && 
+		    if (prevExecute == 1){ //and the previous command failed to run
+			ignore2 = true; //ignore the next command. 
+		    }
+		} else if ((*it)->get_word() == "||"){ //if the current word is a ||
+		    if (prevExecute == 0){ //and the previous word already succeeded
+		        ignore2 = true;
+		    }
+		}
+		
+		if ((*it)->get_word() == "exit"){ //exit command
+		    return 1;
+		}
+		
+		if (ignore2 == false){ 
+		    prevExecute = dynamic_cast<Command*>(*it)->execute();
+	    	    if (prevExecute == -1){
+		        std::cout << "Invalid Command" << std::endl;
+		    }
+		} else {
+		    it++; //skip this word and move to the next
+		    ignore2 = false; 
+		    prevExecute = 0; //reset prevExecute
+		}
+
 	    }
 	    word_list.clear();
 	    return 0;
