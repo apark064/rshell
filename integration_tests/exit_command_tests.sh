@@ -13,3 +13,5 @@ then
 else
     echo "Test failed"
 fi
+
+echo "Output of exit command located in exit_test"
