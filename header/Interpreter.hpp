@@ -50,7 +50,7 @@ class Interpreter {
 		    	    wordCount--; //subtract the count we performed for the previous char;
 			    tokenReset = true;
 		        } else { //if the user only used one |
-			    //std::cout << "INVALID CONNECTOR" << std::endl;
+			    //std::cout << "INVALID CONNECTOR" << std::endl;               //can be used as a pipe check later
 		        }
 		    } else if ( (prev_token == "&") && (string == false) ){ 
 		        if (token == "&"){ //THE CURRENT TOKEN CREATES A &&

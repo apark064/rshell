@@ -1,7 +1,11 @@
 #!/bin/bash
 
+echo "Testing exit command: exit"
+
 cd ..
-./rshell <<< "exit"
+./rshell << EOF > integration_tests/exit_test
+exit
+EOF
 
 if [ $? -eq 0 ]
 then

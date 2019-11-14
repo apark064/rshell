@@ -1,7 +1,12 @@
 #!/bin/bash
 
+echo "Testing commented command: ls # -lR"
+
 cd ..
-./rshell <<< "ls # -lR"
+./rshell << EOF > integration_tests/commented_test
+"ls # -lR"
+exit
+EOF
 
 if [ $? -eq 0 ]
 then
