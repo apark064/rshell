@@ -36,4 +36,6 @@ test
 
 # CMake Temp Files
 CMakeCache.txt
-CMakeFiles
+CMakeFiles/
+cmake_install.cmake
+Makefile

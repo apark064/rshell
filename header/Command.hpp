@@ -35,13 +35,20 @@ class Command: public Word {
 			}
 			argv[sequence.size()] = NULL; //terminate with NULL
 		    	execvp(argv[0],argv);
-		} else{
+		} else {
 			if (waitpid(pid,&status,0) > 0){;} //wait until child process is done
 			if (WIFEXITED(status) && !WEXITSTATUS(status)){ //if child process successfully ended
 				
 			}
 		}
-	};
+	}
+	void add_word(Word* new_word){
+		//update the word string of the command object
+		this->word.append(new_word->get_word());
+		this->word.append(" "); //and a space
+		//push the word object into the sequence
+		this->sequence.push_back(new_word);
+	}
         
 };
 #endif //__COMMAND_HPP__
