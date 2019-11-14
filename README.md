@@ -17,7 +17,7 @@ The shell utilizes the composite design pattern. The interpreter class handles u
 # Classes
 
 ### Interpreter
-Handles all user input. Reads an inputted string and runs system executables based off of the formatting of the input. (See below)
+Handles all user input. Reads an inputted string and runs system executables based off of the formatting of the input. Implemented using the Boost C++ Library. (See below)
 
 ``` $ [command] [arguments for command, seperated by whitespace] ```
 
@@ -74,14 +74,14 @@ When the interpretor reaches a connector in the execution sequence, it simply po
 # Prototypes/Research
 The prototype code of this project is found within the prototype directory. There are two files: a prototype.c file where syscalls are tested to see how they function; a parser.cpp file where a prototype parser is tested to be used in this project. 
 
-The syscalls will be used to run any executable commands in the background while the interactive shell stays active. The parser function will use the strtok() function from the C standard library. The parser will detect the user input for any commands and arguments along with any possible connectors and comments that could be inputted at once. 
+The syscalls will be used to run any executable commands in the background while the interactive shell stays active. The parser function will use the tokenizer() function from the Boost C++ library. The parserwill detect the user input for any commands and arguments along with any possible connectors and comments that could be inputted at once. 
 
 
 # Development and Testing Roadmap
-1. - [ ] Create Word base class
-1. - [ ] Create Executable subclass 
-1. - [ ] Create Agrument subclass 
-1. - [ ] Create Connector subclass 
-1. - [ ] Create Interpreter class
-1. - [ ] Create Parser 
-1. - [ ] Create unit tests 
+1. - [x] Create Word base class
+1. - [x] Create Executable subclass 
+1. - [x] Create Agrument subclass 
+1. - [x] Create Connector subclass 
+1. - [x] Create Interpreter class
+1. - [x] Create Parser 
+1. - [x] Create unit tests 

@@ -1,10 +1,13 @@
 #!/bin/bash
 
-echo "Testing single command: date"
+echo "Testing single commands: "
 
 cd ..
 ./rshell << EOF > integration_tests/single_test
 date
+cal
+ls
+echo hello
 exit
 EOF
 
@@ -14,3 +17,5 @@ then
 else
     echo "Test failed"
 fi
+
+echo "Output of commands located in single_test"
