@@ -12,12 +12,14 @@ class StratDecorator : public InterpreterStrat{
 		InterpreterStrat* Base;
                 bool status;
                 std::string character;
-		vector<int> calls;
+		vector<std::string> calls;
         public:
-                virtual vector<int>  interpret(std::string token){return Base->interpret(token);}
-                virtual vector<int> execute (){return Base->execute();}//this is overwritten in subclasses
+                virtual vector<std::string>  interpret(std::string token){return Base->interpret(token);}
+                virtual vector<std::string> execute (){return Base->execute();}//this is overwritten in subclasses
                 virtual bool get_status() {return Base->get_status();}
 		virtual std::string get_character() {return Base->get_character();}
+		virtual int previous_must_be() {return -1;} //this is also decorated
+		virtual void reset_vars() {this->Base->reset_vars();}
 };
 
 #endif

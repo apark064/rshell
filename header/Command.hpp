@@ -25,6 +25,10 @@ class Command: public Word {
         Command() {};
 	Command(vector<Word*> sequence){this->sequence = sequence;};
 	std::string get_word(){return this->word;};
+	void set_word(Word* word){ //clears the current sequence and appends the word in the argument
+	    this->sequence.clear();
+	    sequence.push_back(word);
+	}
 	int execute(){ //returns 0 if successful. returns 1 if failed
 		pid_t pid = fork();
 		int status;

@@ -13,5 +13,6 @@ class Connector : public Word {
         Connector() {};
         Connector(std::string word){this->word = word;};
         std::string get_word(){return this->word;};
+	void set_word(Word* word) {this->word = word->get_word();}
 };
 #endif //__CONNECTOR__HPP__
