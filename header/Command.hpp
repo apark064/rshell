@@ -29,7 +29,7 @@ class Command: public Word {
 	    this->sequence.clear();
 	    sequence.push_back(word);
 	}
-	int execute(){ //returns 0 if successful. returns 1 if failed
+	std::string execute(){ //returns 0 if successful. returns 1 if failed
 		pid_t pid = fork();
 		int status;
 		if (pid == 0){ //if child process
@@ -42,10 +42,10 @@ class Command: public Word {
 		} else {
 			if (waitpid(pid,&status,0) > 0){;} //wait until child process is done
 			if (WIFEXITED(status) && !WEXITSTATUS(status)){ //if child process successfully ended
-				return 0;	
+				return "16 0";	
 			} else {
 				//cout << "failed" << endl;
-				return 1;
+				return "16 1";
 			}
 		}
 	}

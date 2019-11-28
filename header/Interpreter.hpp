@@ -15,7 +15,7 @@
 #include "Exec.hpp"
 #include "Arg.hpp"
 #include "Connector.hpp"
-
+//INTERPRETER STRATS
 #include "InterpreterStrats/InterpreterStrat.hpp"
 
 #include "InterpreterStrats/SingleCharStrat.hpp"
@@ -30,6 +30,9 @@
 #include "InterpreterStrats/Quotes.hpp"
 #include "InterpreterStrats/Paren.hpp"
 #include "InterpreterStrats/Brackets.hpp"
+//COMMAND DECORATORS
+#include "Span.hpp"
+#include "Test.hpp"
 
 using namespace std;
 
@@ -46,6 +49,8 @@ class Interpreter {
 	
 	int PREVIOUS_EXECUTE = -1; //the status of the previous command->execute(). used for nested commands
 	std::vector<Word*>* CURRENT_WORD_LIST; //a pointer to the current word_list that the interpreter is working on. used for referencing the wordlist outside of the read_line function call	
+
+	std::string COMMAND_DECORATOR = ""; //if not, empty, decorates interpreted commands with the value in the string (kinda hard-codey but we're on a time constraint)
 
 	//strategies
 	std::vector<InterpreterStrat*> strats = {
@@ -93,7 +98,7 @@ class Interpreter {
 	        case 7: this->wordCount--; break; //7 = decrement wordCount
 	        case 8: this->INTERPRETATION_IN_PROGRESS = true; break; //8 = in Action. turns off at the end of each token loop
 		case 9: this->TOKEN_OVERRIDE = STRING_INPUT; break; //9 = set TOKEN_OVERRIDE to string input
-		case 10: this->PREVIOUS_EXECUTE = temp_execute(STRING_INPUT); break; //10 = immediately run STRING_INPUT as a command.
+		case 10: this->PREVIOUS_EXECUTE = temp_execute(STRING_INPUT); break; //10 = immediately run STRING_INPUT as a command and save the result in PREVIOUS_EXECUTE
 		case 11: temp_insert(CURRENT_WORD_LIST, temp_read(STRING_INPUT)); break; //interprets STRING_INPUT and pushes all contents to to CURRENT_WORD_LIST
 		case 12: this->STRATEGY_IN_PROGRESS = ""; break; //12 = clears STRATEGY_IN_PROGRESS
 		case 13: cout << STRING_INPUT << endl; break; //13 = output STRING_INPUT
@@ -104,6 +109,8 @@ class Interpreter {
 		    this->INTERPRETATION_IN_PROGRESS = false;
 		    this->STRATEGY_IN_PROGRESS = "";
 		    break;
+		case 15: this->COMMAND_DECORATOR = STRING_INPUT; break; //15 = sets COMMAND_DECORATOR to STRING_INPUT
+		case 16: this->PREVIOUS_EXECUTE = std::stoi(STRING_INPUT.substr(0,1),nullptr); //16 = sets PREVIOUS_EXECUTE to the int version of STRING_INPUT
 		default: break;
 	    }
 	}
@@ -157,6 +164,7 @@ class Interpreter {
 	    //prepatory vars
 	    std::string PREVIOUS_TOKEN;
 	    Command* command = new Command();
+	    Command* command_ptr = command; //this is a pointer to the actual command object. we append this instead of the command object for decorator functionality.
 
 	    //INTERPRET TOKENS
 	    for(auto it = tokens.begin(); it != tokens.end(); it++){   
@@ -206,10 +214,10 @@ class Interpreter {
 		    	    if (CURRENT_TOKEN != " "){ //ignore space tokens
 		    	        if (wordCount == 0){ //APPENED A EXEC
 			            command->add_word(new Exec(CURRENT_TOKEN));
-				    debug(2,"\"" + CURRENT_TOKEN + "\" was appended as an EXEC. Wordcount: " + to_string(this->wordCount));
+				    //debug(2,"\"" + CURRENT_TOKEN + "\" was appended as an EXEC. Wordcount: " + to_string(this->wordCount));
 			        } else { //APPEND AN ARGa
 				    command->add_word(new Arg(CURRENT_TOKEN));
-				    debug(2,"\"" + CURRENT_TOKEN + "\" was appended as an ARG. Wordcount: " + to_string(this->wordCount));
+				    //debug(2,"\"" + CURRENT_TOKEN + "\" was appended as an ARG. Wordcount: " + to_string(this->wordCount));
 				    }
 			        this->wordCount++;    
 			        //cout << "New Wordcount: " << this->wordCount << endl;
@@ -225,12 +233,13 @@ class Interpreter {
 		    //RESET TOKENS IF NECESSARY
 		    else {
 			//append the built command we have made and instantiate a new command object to append to
-			word_list.push_back(command);
-			command = new Command();
+			word_list.push_back(command_ptr); //push back the pointer of our command
+			command = new Command(); //create a new command
+			command_ptr = command; //repoint to new command
 			
 			//append our connector
 			word_list.push_back(new Connector(CURRENT_TOKEN));
-			debug(2, "\"" + CURRENT_TOKEN + "\" was appended as a CONNECTOR");
+			//debug(2, "\"" + CURRENT_TOKEN + "\" was appended as a CONNECTOR");
 			
 			//reset
 		        PREVIOUS_TOKEN = "";
@@ -238,10 +247,21 @@ class Interpreter {
 		        this->wordCount = 0;
 		    }
 		}
+
+		//decorate command.
+		if (COMMAND_DECORATOR != ""){
+		    if (COMMAND_DECORATOR == "SPAN"){
+			command_ptr = new Span(command);
+		    } else if (COMMAND_DECORATOR == "TEST"){
+		        command_ptr = new Test(command);
+		    }
+		    this->COMMAND_DECORATOR = ""; //reset command decorator
+		}
+
 		this->INTERPRETATION_IN_PROGRESS = false;
             }
 	    //EOL
-	    word_list.push_back(command); //push the last command in
+	    word_list.push_back(command_ptr); //push the last command in
 	    
 	    //check for invalid inputs (ex: incomplete spans)
 	    for (auto strit = strats.begin(); strit != strats.end(); strit++){
@@ -264,19 +284,18 @@ class Interpreter {
 	    bool AVOID_EXECUTE = false; //if true, avoids the execution of the command	    
 	
 	    //std::cout << "here is our wordlist: " << endl;
-	    //for (unsigned i = 0; i < word_list.size(); i++){
-	    //std::cout << "word " << i << ": '" << word_list.at(i)->get_word() << "'" << std::endl;
-	    //}
-
+	    /*for (unsigned i = 0; i < word_list.size(); i++){
+	    std::cout << "word " << i << ": '" << word_list.at(i)->get_word() << "'" << std::endl;
+	    }*/
 	    for (auto it = word_list.begin(); it != word_list.end(); it++){
-		//cout << "checking '" << (*it)->get_word() << "'" << endl;
+		//cout << "WORD: '" << (*it)->get_word() << "'" << endl;
 		for (auto strit = strats.begin(); strit != strats.end(); strit++){ //check for conditional running for our strategies
 		    if ((*strit)->get_character() == (*it)->get_word()){ //if our word matches any of our interpretation strategies (connectors)
 		    	if ((*strit)->previous_must_be() != -1){ //-1 means the strategy doesn't need any previous output. by using !=, the strategy requires a certain output
 			    if (PREVIOUS_EXECUTE != (*strit)->previous_must_be()){
 			    	AVOID_EXECUTE = true;
 				IGNORE_NEXT_WORD = true;
-				//cout << "this should be ignoring" << endl;
+				//cout << "IGNORE_NEXT_WORD = true;" << endl;
 			    } else {
 				//std::cout << "PREVIOUS EXECUTE (" << PREVIOUS_EXECUTE << ") == " << (*strit)->get_character() << "'s " << (*strit)->previous_must_be() << " so we will let '" << (*it)->get_word() << "' to execute." << std::endl;
 			    }
@@ -312,8 +331,7 @@ class Interpreter {
 		}
 		
 		if (AVOID_EXECUTE == false){
-		    //std::cout << "executing '" << (*it)->get_word() << "'" << endl;
-		    PREVIOUS_EXECUTE = dynamic_cast<Command*>(*it)->execute(); //returns 0 if succesful, 1 if failed, -1 if invalid.
+		    this->InterpreterCall((*it)->execute()); //we use an interpreter call to set our PREVIOUS_EXECUTE now
 	    	    if (PREVIOUS_EXECUTE == -1){
 		        std::cout << "Invalid Command: \"" << (*it)->get_word() << "\"" <<  std::endl;
 		    	PREVIOUS_EXECUTE = 1; //treat invalid commands as failures
