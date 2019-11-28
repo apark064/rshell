@@ -1,5 +1,5 @@
-#ifndef __TEST__HPP__
-#define __TEST__HPP__
+#ifndef __SPAN__HPP__
+#define __SPAN__HPP__
 #include <iostream>
 #include <string>
 #include <vector>
@@ -12,10 +12,11 @@
 #include "Exec.hpp"
 #include "Arg.hpp"
 #include "Command.hpp"
+#include "Interpreter.hpp"
 
 using namespace std;
 
-class Test: public Command {
+class Span: public Command {
     protected:
         string word;
     
@@ -24,7 +25,7 @@ class Test: public Command {
         vector<Word*> sequence;
 
     public:
-        Test(Command* base) {
+        Span(Command* base) {
 	    this->Base = base;
 	}
 	std::string get_word(){
@@ -33,9 +34,9 @@ class Test: public Command {
 	void set_word(Word* word){
 	    this->Base->set_word(word);
 	}
-	std::string execute(){ //returns 0 if successful. returns 1 if failed
-		std::cout << "this is a test. and the test is '" << this->get_word() << "'" << std::endl;
-		return "16 0";
+	std::string execute(){ //returns "16 0" if successful. returns "16 1" if failed
+		//std::cout << "this is a span. and the span is '" << this->get_word() << "'" << std::endl;
+		return "10 " + this->get_word(); //returns 10,
 	}
 	void add_word(Word* new_word){
 		this->Base->add_word(new_word);

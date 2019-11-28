@@ -22,13 +22,13 @@ class Paren : public StratDecorator{
 			    
 
 			    unsigned index = calls.size()-2; //this is the index of the 2nd-to-last call, which holds the full parentheses.
-				calls.at(index)[0] = '1'; calls.at(index)[1] = '1'; //changes code to 11, which immediately pushs STRING_INPUT to CURRENT_WORD_LIST
+				calls.at(index)[0] = '0'; calls.at(index)[1] = '9'; //sets TOKEN_OVERRIDE to the span without it's ends (see below)
 				calls.at(index).erase(3,1); calls.at(index).erase(calls.at(index).size()-1,1); //delete the ends of the span
-				calls.push_back("09  "); //set TOKEN_OVERRIDE to blank,			    	
+				calls.push_back("15 SPAN"); //set COMMAND_DECORATOR to "SPAN"		    	
 
 			    /*for (unsigned i = 0; i < calls.size(); i++){
 			        std::cout << "CALL " << i << ": '" << calls.at(i) << "'" << std::endl;
-			    } */   
+			    } */ 
 			}
 			return calls;
 		};

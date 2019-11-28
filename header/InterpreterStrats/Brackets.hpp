@@ -21,10 +21,10 @@ class Brackets : public StratDecorator{
 			    calls.erase(calls.begin()); //delete the "this spanstrat is not decorated" message  
 			   
 			    int index = calls.size()-2; //this is the index of the 2nd-to-last call, which holds the full parentheses.
-				calls.at(index)[0] = '1'; calls.at(index)[1] = '0'; //set call code to 10, which immediately runs the string input as a command
+				//calls.at(index)[0] = '1'; calls.at(index)[1] = '1'; //set call code to 11, which interprets the string input and appends it to the word_List
 				calls.at(index).erase(3,1); calls.at(index).erase(calls.at(index).size()-1,1); //delete the ends of the span
 				calls.at(index).insert(2," test" );
-			    	calls.push_back("09  "); //set TOKEN_OVERRIDE to "";
+			    	calls.push_back("15 TEST"); //set COMMAND_DECORATOR to "TEST".
 			    
 			    //for (unsigned i = 0; i < calls.size(); i++){
 			    //    std::cout << "CALL " << i << ": '" << calls.at(i) << "'" << std::endl;
