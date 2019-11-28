@@ -206,10 +206,10 @@ class Interpreter {
 		    	    if (CURRENT_TOKEN != " "){ //ignore space tokens
 		    	        if (wordCount == 0){ //APPENED A EXEC
 			            command->add_word(new Exec(CURRENT_TOKEN));
-				    //debug(2,"\"" + CURRENT_TOKEN + "\" was appended as an EXEC. Wordcount: " + to_string(this->wordCount));
+				    debug(2,"\"" + CURRENT_TOKEN + "\" was appended as an EXEC. Wordcount: " + to_string(this->wordCount));
 			        } else { //APPEND AN ARGa
 				    command->add_word(new Arg(CURRENT_TOKEN));
-				    //debug(2,"\"" + CURRENT_TOKEN + "\" was appended as an ARG. Wordcount: " + to_string(this->wordCount));
+				    debug(2,"\"" + CURRENT_TOKEN + "\" was appended as an ARG. Wordcount: " + to_string(this->wordCount));
 				    }
 			        this->wordCount++;    
 			        //cout << "New Wordcount: " << this->wordCount << endl;
@@ -230,7 +230,7 @@ class Interpreter {
 			
 			//append our connector
 			word_list.push_back(new Connector(CURRENT_TOKEN));
-			//debug(2, "\"" + CURRENT_TOKEN + "\" was appended as a CONNECTOR");
+			debug(2, "\"" + CURRENT_TOKEN + "\" was appended as a CONNECTOR");
 			
 			//reset
 		        PREVIOUS_TOKEN = "";
