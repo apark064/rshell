@@ -308,9 +308,6 @@ class Interpreter {
 
 		if ((*it)->get_word() == "exit"){ //exit command
 		    return 2; //2 is now our new exit command
-		} else if ((*it)->get_word() == "test"){ //test command
-		    //need to add.
-		}
 		} else if ((*it)->get_word() == ""){ //blank command (if plugging in only a span
 		    AVOID_EXECUTE = true;
 		    IGNORE_NEXT_WORD = false; //acknowledge next word
