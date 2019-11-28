@@ -4,7 +4,7 @@ echo "Testing for symbolic test command execution: "
 
 cd ..
 ./rshell << EOF > integration_tests/symbolic_test
-[ -e test/file/path ] && echo "path exists"
+[ -e /bin/ls ] && echo "path exists"
 exit
 EOF
 

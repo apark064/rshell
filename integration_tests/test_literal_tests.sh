@@ -4,7 +4,7 @@ echo "Testing for test command execution: "
 
 cd ..
 ./rshell << EOF > integration_tests/literal_test
-test -e test/file/path && echo "path exists"
+test -e /bin/ls && echo "path exists"
 exit
 EOF
 
