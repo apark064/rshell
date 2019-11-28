@@ -69,4 +69,4 @@ TEST(gitTest, gitStatus) {
     EXPECT_EQ(1, 1);
 }
 
-#endif __TEST_COMMAND_HPP__
+#endif //__TEST_COMMAND_HPP__

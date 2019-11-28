@@ -14,7 +14,7 @@ std::string get_input(){
 
 int main() {
     
-    std::cout << "RSHELL" << std::endl;
+    //std::cout << "RSHELL" << std::endl;
     Interpreter* shell = new Interpreter();
     
     while (shell->execute(shell->read_line(get_input())) != 2) {;} //2 is our new exit command

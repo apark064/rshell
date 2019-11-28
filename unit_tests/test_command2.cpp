@@ -45,4 +45,4 @@ int main() {
 }
 
 
-#endif __TEST_COMMAND2_HPP__
+#endif //__TEST_COMMAND2_HPP__
