@@ -10,6 +10,8 @@
 #include <vector>
 #include <boost/tokenizer.hpp>
 
+
+
 #include "Word.hpp"
 #include "Command.hpp"
 #include "Exec.hpp"
@@ -33,8 +35,11 @@
 //COMMAND DECORATORS
 #include "Span.hpp"
 #include "Test.hpp"
+#include <boost/filesystem.hpp> //used for test  command
+
 
 using namespace std;
+using namespace boost::filesystem;
 
 class Interpreter {
     private:
@@ -110,11 +115,20 @@ class Interpreter {
 		    this->STRATEGY_IN_PROGRESS = "";
 		    break;
 		case 15: this->COMMAND_DECORATOR = STRING_INPUT; break; //15 = sets COMMAND_DECORATOR to STRING_INPUT
-		case 16: this->PREVIOUS_EXECUTE = std::stoi(STRING_INPUT.substr(0,1),nullptr); //16 = sets PREVIOUS_EXECUTE to the int version of STRING_INPUT
+		case 16: this->PREVIOUS_EXECUTE = std::stoi(STRING_INPUT.substr(0,1),nullptr); //16 = sets PREVIOUS_EXECUTE to the int version of the first character of STRING_INPUT
 		default: break;
 	    }
 	}
 	
+	std::string convertExecute(int value){ //helper function that returns a string version of the value.
+	    switch (value){
+		case -1: return "(Invalid)";
+		case 0:  return "(True)";
+		case 1:  return "(False)";
+		default: return "(Invalid)";
+		}
+	}
+
 	void temp_insert(std::vector<Word*>* a, std::vector<Word*> b){ //a helper function for temporary vector insertion since we can't pull this off in the switch case
 		a->insert(a->end(),b.begin(),b.end());   
 	}
@@ -148,7 +162,7 @@ class Interpreter {
 	
 	std::vector<Word*> read_line(std::string line){ //returns a vector of Word Objects (only Command and Connector objects)
 	    std::vector<Word*> word_list;
-	    CURRENT_WORD_LIST = &word_list;
+	    CURRENT_WORD_LIST = &word_list; //this pointer is to reference the word_list outside of read_line
 	    line.append(" "); //append space character so the last token runs.
 	    
 	    //take all of the characters in our strategy and put them into a char array as sperators characters for our tokenizer
@@ -235,7 +249,7 @@ class Interpreter {
 			//append the built command we have made and instantiate a new command object to append to
 			word_list.push_back(command_ptr); //push back the pointer of our command
 			command = new Command(); //create a new command
-			command_ptr = command; //repoint to new command
+			command_ptr = command; //repoint to the new command
 			
 			//append our connector
 			word_list.push_back(new Connector(CURRENT_TOKEN));
@@ -248,7 +262,7 @@ class Interpreter {
 		    }
 		}
 
-		//decorate command.
+		//decorate command by changing the pointer
 		if (COMMAND_DECORATOR != ""){
 		    if (COMMAND_DECORATOR == "SPAN"){
 			command_ptr = new Span(command);
@@ -295,16 +309,13 @@ class Interpreter {
 			    if (PREVIOUS_EXECUTE != (*strit)->previous_must_be()){
 			    	AVOID_EXECUTE = true;
 				IGNORE_NEXT_WORD = true;
-				//cout << "IGNORE_NEXT_WORD = true;" << endl;
-			    } else {
-				//std::cout << "PREVIOUS EXECUTE (" << PREVIOUS_EXECUTE << ") == " << (*strit)->get_character() << "'s " << (*strit)->previous_must_be() << " so we will let '" << (*it)->get_word() << "' to execute." << std::endl;
 			    }
 		
 			}
 		    }
 		}
 		
-		//what we essentially have here are custom commands for things.
+		//custom one-word commands
 
 		if ((*it)->get_word() == "exit"){ //exit command
 		    return 2; //2 is now our new exit command
@@ -317,20 +328,98 @@ class Interpreter {
 		} else if ((*it)->get_word() == "(False)"){ //logic override
 		    PREVIOUS_EXECUTE = 1;
 		    AVOID_EXECUTE = true;
-		} else if ((*it)->get_word() == "(Carry Over)"){ //this just passes on the same PREVIOUS_EXECUTE.
-		    AVOID_EXECUTE = true;
-		    IGNORE_NEXT_WORD = false; //acknowledge next word.
-		    //replace carry over with (True) or (False) depending on previous_execute
-		    if (PREVIOUS_EXECUTE == 0){
-		        (*it)->set_word(new Arg("(True)") );
-		    } else if (PREVIOUS_EXECUTE == 1) {
-		        (*it)->set_word(new Arg("(False)") );
-		    } else if (PREVIOUS_EXECUTE == -1) {
-		        (*it)->set_word(new Arg("(Invalid)") );
-		    }
+		}
+
+		//custom multi-word commands
+		//cout << "calling get_sequence()" << endl;
+		vector<Word*> it_s;
+		if ((*it)->execute() != "CONNECTOR"){ //cheap type-checking for if we are dealing with a connector. for some reason, it gives a seg fault if you pass a connector on the below line
+			it_s = dynamic_cast<Command*>(*it)->get_sequence(); //get the words in the command in the list.
+		} else {
+		    AVOID_EXECUTE = true; //you don't want to be passing "CONNECTOR" in an interpreter call LOL
+		}
+		//cout << "successfully called" <<endl;
+		if (it_s.size() > 0){
+			std::string firstWord = it_s.at(0)->get_word();
+			//cout << "first word: '" << firstWord << "'" <<endl;
+			
+			//this is kinda hardcode-y but this can be fixed
+
+			if (firstWord == "test"){ //TEST COMMAND
+			    //cout << " TEST COMMAND" << endl;
+			    char flag = 'e'; //default
+			    int result = 0;
+			    std::string location; //location to test			    
+
+			    //determine behavior
+			    std::string secondWord = it_s.at(1)->get_word();
+			    if (secondWord == "-e"){ //check if file/directory exists
+				if (it_s.size() > 2){
+				    location = it_s.at(2)->get_word(); //set location to third word
+				} else { //if only flag was specified
+				}
+			    } else if (secondWord == "-f"){ //check if file/directory exists and is a FILE
+			        if (it_s.size() >2){
+				    location = it_s.at(2)->get_word(); //set location to third word
+				    flag = 'f';
+				} else { //if only flag was specified
+				}
+			    } else if (secondWord == "-d"){ //check if file/direectory exists and is a DIRECTORY
+				if (it_s.size() > 2) {
+				    location = it_s.at(2)->get_word(); //set location to third word
+				    flag = 'd';
+				} else { //if only flag was specified
+				}
+			    } else { //no flag specified
+				location = secondWord; //set location to second word
+			    }
+			   
+			    //we use boost::filesystem 's namespace so these don't need to be prefixed
+			    char * location_cstr = const_cast<char*>(location.c_str());
+			    path p (location_cstr); //path is a boost::filesystem object
+
+			    //first, test if location exists
+			    if (exists(p)){
+			        result = 0; //return true
+				//cout << "exists" <<endl;
+			        //next, test only based on flags
+			        if (flag == 'f'){
+
+			    	    if (is_regular_file(p)){ //if file
+				        result = 0; //kinda redundant
+					//cout << "file exists" <<endl;
+				    } else {
+					//cout << "not a file though" << endl;
+				        result = 1;
+				    }
+
+			        } else if (flag == 'd'){
+
+			    	   if (is_directory(p)){ //if directory
+				       result = 0; //kinda redundant
+				       //cout << "directory exists" <<endl;
+				   } else {
+				       //cout << "not a directory though" << endl;
+				       result = 1;
+				   }
+
+			        }
+			    } else {
+				//cout <<"doesn't exist" <<endl;
+				result = 1;
+			    }			    
+			    
+			    //prevent execute() call, since we dont want to use the test command in bin
+			    PREVIOUS_EXECUTE = result;
+			    AVOID_EXECUTE = true;
+			    InterpreterCall("13 " + convertExecute(result)); //print result
+
+			}
+
 		}
 		
 		if (AVOID_EXECUTE == false){
+		    //cout << "calling execute()" <<endl;
 		    this->InterpreterCall((*it)->execute()); //we use an interpreter call to set our PREVIOUS_EXECUTE now
 	    	    if (PREVIOUS_EXECUTE == -1){
 		        std::cout << "Invalid Command: \"" << (*it)->get_word() << "\"" <<  std::endl;
