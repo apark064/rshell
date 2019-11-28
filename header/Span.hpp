@@ -41,6 +41,9 @@ class Span: public Command {
 	void add_word(Word* new_word){
 		this->Base->add_word(new_word);
 	}
+	std::vector<Word*> get_sequence(){
+		return Base->get_sequence();
+	}
         
 };
 #endif //__SPAN_HPP__

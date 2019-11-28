@@ -29,6 +29,9 @@ class Command: public Word {
 	    this->sequence.clear();
 	    sequence.push_back(word);
 	}
+	vector<Word*> get_sequence(){
+	    return this->sequence;
+	}
 	std::string execute(){ //returns 0 if successful. returns 1 if failed
 		pid_t pid = fork();
 		int status;
