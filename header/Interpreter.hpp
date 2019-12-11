@@ -23,11 +23,13 @@
 #include "InterpreterStrats/SingleCharStrat.hpp"
 #include "InterpreterStrats/Comment.hpp"
 #include "InterpreterStrats/Semicolon.hpp"
-#include "InterpreterStrats/O_Redirect.hpp"
 
 #include "InterpreterStrats/MultiCharStrat.hpp"
 #include "InterpreterStrats/Doublepipe.hpp"
 #include "InterpreterStrats/Doubleamp.hpp"
+
+#include "InterpreterStrats/LooseCharStrat.hpp"
+#include "InterpreterStrats/O_Redirect.hpp"
 
 #include "InterpreterStrats/SpanStrat.hpp"
 #include "InterpreterStrats/Quotes.hpp"
@@ -67,8 +69,7 @@ class Interpreter {
 	    new Quotes(new SpanStrat("\"")),
 	    new Paren(new SpanStrat("()")),
 	    new Brackets(new SpanStrat("[]")),
-	    new O_Redirect(new SingleCharStrat(">"))
-	    //new O_Redirect(new MultiCharStrat(">>"))
+	    new O_Redirect(new LooseCharStrat(">>"))
 	};
 
 
