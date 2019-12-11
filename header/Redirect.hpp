@@ -55,6 +55,7 @@ class Redirect: public Command {
 		dup(stdFd); //dup our std back into output
 		close(stdFd); //close our dup'd sd
 		
+		//std::cout << "Reached end of Redirect!" << std::endl;
 		return result;
 
 	}
@@ -75,6 +76,7 @@ class Redirect_Target : public Command{
 	std::string get_word(){return Base->get_word();}
 	void set_word(Word* word){this->Base->set_word(word);}
 	std::string execute(){ //returns "16 0" if successful. returns "16 1" if failed
+		//std::cout << "Redirect Target!" <<std::endl;
 		const char* FILEPATH = Base->get_word().c_str();
 		
 		//if FILEPATH is a real path, "set" the contents of FILEPATH to the contents to TEMP_REDIRECT. and then delete TEMP_REDIRECT
