@@ -23,6 +23,7 @@
 #include "InterpreterStrats/SingleCharStrat.hpp"
 #include "InterpreterStrats/Comment.hpp"
 #include "InterpreterStrats/Semicolon.hpp"
+#include "InterpreterStrats/O_Redirect.hpp"
 
 #include "InterpreterStrats/MultiCharStrat.hpp"
 #include "InterpreterStrats/Doublepipe.hpp"
@@ -36,7 +37,7 @@
 #include "Span.hpp"
 #include "Test.hpp"
 #include <boost/filesystem.hpp> //used for test  command
-
+#include "Redirect.hpp"
 
 using namespace std;
 using namespace boost::filesystem;
@@ -55,7 +56,7 @@ class Interpreter {
 	int PREVIOUS_EXECUTE = -1; //the status of the previous command->execute(). used for nested commands
 	std::vector<Word*>* CURRENT_WORD_LIST; //a pointer to the current word_list that the interpreter is working on. used for referencing the wordlist outside of the read_line function call	
 
-	std::string COMMAND_DECORATOR = ""; //if not, empty, decorates interpreted commands with the value in the string (kinda hard-codey but we're on a time constraint)
+	std::vector<std::string> COMMAND_DECORATOR; //if not, empty, decorates interpreted commands with the values in the vector
 
 	//strategies
 	std::vector<InterpreterStrat*> strats = {
@@ -65,7 +66,9 @@ class Interpreter {
 	    new Doubleamp(new MultiCharStrat("&&")),
 	    new Quotes(new SpanStrat("\"")),
 	    new Paren(new SpanStrat("()")),
-	    new Brackets(new SpanStrat("[]"))
+	    new Brackets(new SpanStrat("[]")),
+	    new O_Redirect(new SingleCharStrat(">"))
+	    //new O_Redirect(new MultiCharStrat(">>"))
 	};
 
 
@@ -114,7 +117,7 @@ class Interpreter {
 		    this->INTERPRETATION_IN_PROGRESS = false;
 		    this->STRATEGY_IN_PROGRESS = "";
 		    break;
-		case 15: this->COMMAND_DECORATOR = STRING_INPUT; break; //15 = sets COMMAND_DECORATOR to STRING_INPUT
+		case 15: this->COMMAND_DECORATOR.push_back(STRING_INPUT); break; //15 = sets COMMAND_DECORATOR to STRING_INPUT
 		case 16: this->PREVIOUS_EXECUTE = std::stoi(STRING_INPUT.substr(0,1),nullptr); //16 = sets PREVIOUS_EXECUTE to the int version of the first character of STRING_INPUT
 		default: break;
 	    }
@@ -221,6 +224,28 @@ class Interpreter {
 		    this->TOKEN_OVERRIDE = ""; //reset override
 		}
 
+		//decorate command by changing the pointer
+		if (COMMAND_DECORATOR.size() != 0){
+		    while (COMMAND_DECORATOR.size() > 0){
+			Command* dummy_ptr = command_ptr; //points to what the command_ptr is pointing to
+		    	Command* decorator_ptr; //points to the new instantiated decorator that points to the dummy ptr.
+			std::string decorator = COMMAND_DECORATOR.at(COMMAND_DECORATOR.size()-1);
+			
+		        if (decorator == "SPAN"){
+			    decorator_ptr = new Span(dummy_ptr);
+		        } else if (decorator == "TEST"){
+		            decorator_ptr = new Test(dummy_ptr);
+		        } else if (decorator == "REDIRECT"){
+			    decorator_ptr = new Redirect(dummy_ptr);
+			} else if (decorator == "REDIRECT_TARGET"){
+			    decorator_ptr = new Redirect_Target(dummy_ptr);
+			}
+			
+			command_ptr = decorator_ptr; //point the command_ptr to the new decorator_ptr.
+			COMMAND_DECORATOR.pop_back();
+		    }
+		}
+
 		//IF NOT IGNORING TOKENS
 		if (this->HALT_INTERPRETATION == false){
 		    if (this->END_OF_COMMAND == false){
@@ -262,16 +287,6 @@ class Interpreter {
 		    }
 		}
 
-		//decorate command by changing the pointer
-		if (COMMAND_DECORATOR != ""){
-		    if (COMMAND_DECORATOR == "SPAN"){
-			command_ptr = new Span(command);
-		    } else if (COMMAND_DECORATOR == "TEST"){
-		        command_ptr = new Test(command);
-		    }
-		    this->COMMAND_DECORATOR = ""; //reset command decorator
-		}
-
 		this->INTERPRETATION_IN_PROGRESS = false;
             }
 	    //EOL
@@ -296,6 +311,7 @@ class Interpreter {
 	    //EXECUTE COMMANDS
 	    bool IGNORE_NEXT_WORD = false; //if true, ignores the next command
 	    bool AVOID_EXECUTE = false; //if true, avoids the execution of the command	    
+
 	
 	    //std::cout << "here is our wordlist: " << endl;
 	    /*for (unsigned i = 0; i < word_list.size(); i++){
@@ -307,11 +323,11 @@ class Interpreter {
 		    if ((*strit)->get_character() == (*it)->get_word()){ //if our word matches any of our interpretation strategies (connectors)
 		    	if ((*strit)->previous_must_be() != -1){ //-1 means the strategy doesn't need any previous output. by using !=, the strategy requires a certain output
 			    if (PREVIOUS_EXECUTE != (*strit)->previous_must_be()){
-			    	AVOID_EXECUTE = true;
 				IGNORE_NEXT_WORD = true;
 			    }
 		
 			}
+			AVOID_EXECUTE = true;
 		    }
 		}
 		
@@ -333,10 +349,8 @@ class Interpreter {
 		//custom multi-word commands
 		//cout << "calling get_sequence()" << endl;
 		vector<Word*> it_s;
-		if ((*it)->execute() != "CONNECTOR"){ //cheap type-checking for if we are dealing with a connector. for some reason, it gives a seg fault if you pass a connector on the below line
+		if (AVOID_EXECUTE == false){ //cheap type-checking for if we are dealing with a connector. for some reason, it gives a seg fault if you pass a connector on the below line
 			it_s = dynamic_cast<Command*>(*it)->get_sequence(); //get the words in the command in the list.
-		} else {
-		    AVOID_EXECUTE = true; //you don't want to be passing "CONNECTOR" in an interpreter call LOL
 		}
 		//cout << "successfully called" <<endl;
 		if (it_s.size() > 0){

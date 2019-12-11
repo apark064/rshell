@@ -6,7 +6,6 @@
 
 #include "Word.hpp"
 
-
 class Connector : public Word {
     protected:
         std::string word;
@@ -16,7 +15,7 @@ class Connector : public Word {
         Connector(std::string word){this->word = word;};
         std::string get_word(){return this->word;};
 	void set_word(Word* word) {this->word = word->get_word();}
-	std::string execute() {return "CONNECTOR";} //cheap type-checking
+	std::string execute() {return "";}
 	std::vector<Word*> get_sequence() {
 	    return {};
 	}
