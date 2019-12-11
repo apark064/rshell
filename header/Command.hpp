@@ -20,6 +20,7 @@ class Command: public Word {
     
     private:
         vector<Word*> sequence;
+	bool allow_run = true; //if set to false, doesn't do the pid call
 
     public:
         Command() {};
@@ -29,27 +30,32 @@ class Command: public Word {
 	    this->sequence.clear();
 	    sequence.push_back(word);
 	}
+	void set_run(bool value){this->allow_run = value;}
 	vector<Word*> get_sequence(){
 	    return this->sequence;
 	}
 	std::string execute(){ //returns 0 if successful. returns 1 if failed
-		pid_t pid = fork();
-		int status;
-		if (pid == 0){ //if child process
-			char *argv[sequence.size() + 1]; //create a char-pointer array
-			for (int i = 0; i < sequence.size(); i++){
-				argv[i] = const_cast<char*>(sequence.at(i)->get_word().c_str()); //move the pointers over. 
-			}
-			argv[sequence.size()] = NULL; //terminate with NULL
-		    	execvp(argv[0],argv);
+		if (allow_run == true){
+		    pid_t pid = fork();
+		    int status;
+		    if (pid == 0){ //if child process
+			    char *argv[sequence.size() + 1]; //create a char-pointer array
+			    for (int i = 0; i < sequence.size(); i++){
+				    argv[i] = const_cast<char*>(sequence.at(i)->get_word().c_str()); //move the pointers over. 
+			    }
+			    argv[sequence.size()] = NULL; //terminate with NULL
+		    	    execvp(argv[0],argv);
+		    } else {
+			    if (waitpid(pid,&status,0) > 0){;} //wait until child process is done
+			    if (WIFEXITED(status) && !WEXITSTATUS(status)){ //if child process successfully ended
+				    return "16 0";	
+			    } else {
+				    //cout << "failed" << endl;
+				    return "16 1";
+			    }
+		    }
 		} else {
-			if (waitpid(pid,&status,0) > 0){;} //wait until child process is done
-			if (WIFEXITED(status) && !WEXITSTATUS(status)){ //if child process successfully ended
-				return "16 0";	
-			} else {
-				//cout << "failed" << endl;
-				return "16 1";
-			}
+		    return "16 0";
 		}
 	}
 	void add_word(Word* new_word){

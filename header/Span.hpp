@@ -44,6 +44,7 @@ class Span: public Command {
 	std::vector<Word*> get_sequence(){
 		return Base->get_sequence();
 	}
+	void set_run(bool value){this->Base->set_run(value);}
         
 };
 #endif //__SPAN_HPP__

@@ -39,6 +39,7 @@ class Test: public Command {
 	void add_word(Word* new_word){
 		this->Base->add_word(new_word);
 	}
+	void set_run(bool value){ this->Base->set_run(value);}
         
 };
 #endif //__SPAN_HPP__
