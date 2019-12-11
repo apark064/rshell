@@ -68,7 +68,6 @@ class Interpreter {
 	    new Paren(new SpanStrat("()")),
 	    new Brackets(new SpanStrat("[]")),
 	    new O_Redirect(new SingleCharStrat(">"))
-	    //new O_Redirect(new MultiCharStrat(">>"))
 	};
 
 
