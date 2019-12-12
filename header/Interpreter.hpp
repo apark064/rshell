@@ -1,7 +1,3 @@
-/* Note: This code could definitely be improved. There are a lot of "hard-coded" cases in here that could be replaced with more re-usable code.
- * 	 Also, theres some conditional statements (mainly in the double-character cases) that could be less redundant.
- * */
-
 #ifndef __INTERPRETER_HPP__
 #define __INTERPRETER_HPP__
 
@@ -29,7 +25,7 @@
 #include "InterpreterStrats/Doubleamp.hpp"
 
 #include "InterpreterStrats/LooseCharStrat.hpp"
-#include "InterpreterStrats/O_Redirect.hpp"
+#include "InterpreterStrats/IO_Redirect.hpp"
 
 #include "InterpreterStrats/SpanStrat.hpp"
 #include "InterpreterStrats/Quotes.hpp"
@@ -56,9 +52,11 @@ class Interpreter {
 	std::string STRATEGY_IN_PROGRESS; //if this string is not empty, the interpreter can only pay attention to the strategy in this string.
 	
 	int PREVIOUS_EXECUTE = -1; //the status of the previous command->execute(). used for nested commands
+	Word* WORD_REGISTER = nullptr; //a pointer to a word. used as a register for commands when calling execute();
 	std::vector<Word*>* CURRENT_WORD_LIST; //a pointer to the current word_list that the interpreter is working on. used for referencing the wordlist outside of the read_line function call	
 
 	std::vector<std::string> COMMAND_DECORATOR; //if not, empty, decorates interpreted commands with the values in the vector
+
 
 	//strategies
 	std::vector<InterpreterStrat*> strats = {
@@ -69,7 +67,8 @@ class Interpreter {
 	    new Quotes(new SpanStrat("\"")),
 	    new Paren(new SpanStrat("()")),
 	    new Brackets(new SpanStrat("[]")),
-	    new O_Redirect(new LooseCharStrat(">>"))
+	    new O_Redirect(new LooseCharStrat(">>")),
+	    new I_Redirect(new SingleCharStrat("<"))
 	};
 
 
@@ -196,7 +195,7 @@ class Interpreter {
 		//debug(0, "token: " + CURRENT_TOKEN);
 		//go through various interpretation strategies
 		for (auto strit = strats.begin(); strit != strats.end(); strit++){
-		    if (this->INTERPRETATION_IN_PROGRESS == false){
+		    if (this->INTERPRETATION_IN_PROGRESS == false){ 
 			if (this->STRATEGY_IN_PROGRESS == "" || this->STRATEGY_IN_PROGRESS == (*strit)->get_character()){
 		            calls = (*strit)->interpret(CURRENT_TOKEN);
 			    this->makecalls();
@@ -232,14 +231,19 @@ class Interpreter {
 		    	Command* decorator_ptr; //points to the new instantiated decorator that points to the dummy ptr.
 			std::string decorator = COMMAND_DECORATOR.at(COMMAND_DECORATOR.size()-1);
 			
+			//these are kinda hardcoded atm but can easily be fixed.
 		        if (decorator == "SPAN"){
 			    decorator_ptr = new Span(dummy_ptr);
 		        } else if (decorator == "TEST"){
 		            decorator_ptr = new Test(dummy_ptr);
-		        } else if (decorator == "REDIRECT"){
-			    decorator_ptr = new Redirect(dummy_ptr);
-			} else if (decorator == "REDIRECT_TARGET"){
-			    decorator_ptr = new Redirect_Target(dummy_ptr);
+		        } else if (decorator == "O_SOURCE"){
+			    decorator_ptr = new O_Source(dummy_ptr);
+			} else if (decorator == "O_TARGET"){
+			    decorator_ptr = new O_Target(dummy_ptr);
+			} else if (decorator == "I_SOURCE"){
+			    decorator_ptr = new I_Source(dummy_ptr); 
+			} else if (decorator == "I_TARGET"){
+			    decorator_ptr = new I_Target(dummy_ptr);
 			}
 			
 			command_ptr = decorator_ptr; //point the command_ptr to the new decorator_ptr.
@@ -348,9 +352,10 @@ class Interpreter {
 		}
 
 		//custom multi-word commands
+		
 		//cout << "calling get_sequence()" << endl;
 		vector<Word*> it_s;
-		if (AVOID_EXECUTE == false){ //cheap type-checking for if we are dealing with a connector. for some reason, it gives a seg fault if you pass a connector on the below line
+		if (AVOID_EXECUTE == false){ //for some reason it gives a seg fault if you pass a connector on the below line
 			it_s = dynamic_cast<Command*>(*it)->get_sequence(); //get the words in the command in the list.
 		}
 		//cout << "successfully called" <<endl;
@@ -435,10 +440,23 @@ class Interpreter {
 		
 		if (AVOID_EXECUTE == false){
 		    //cout << "calling execute()" <<endl;
+		    
 		    this->InterpreterCall((*it)->execute()); //we use an interpreter call to set our PREVIOUS_EXECUTE now
+		    //run the command in the register if there is one. used for if the command should be ran again after the one after it
+		    if (WORD_REGISTER != nullptr){
+			WORD_REGISTER->execute();
+			WORD_REGISTER = nullptr; //reset register to nothing
+		    }
+		
+
 	    	    if (PREVIOUS_EXECUTE == -1){
 		        std::cout << "Invalid Command: \"" << (*it)->get_word() << "\"" <<  std::endl;
 		    	PREVIOUS_EXECUTE = 1; //treat invalid commands as failures
+		    }
+
+		    if (PREVIOUS_EXECUTE == 3){ //3 means the command should be ran again after the command after it, so a pointer to it is saved.
+			WORD_REGISTER = (*it);
+			PREVIOUS_EXECUTE = 0;
 		    }
 
 		} else {
