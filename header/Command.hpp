@@ -55,6 +55,7 @@ class Command: public Word {
 			    }
 		    }
 		} else {
+		    //std::cout << this->get_word() << "'s execute() attempted to be called, but it's allow_run is false." << std::endl;
 		    return "16 0";
 		}
 	}

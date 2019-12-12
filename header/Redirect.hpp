@@ -42,6 +42,13 @@ class O_Source: public Command { //LHS OF >
 		//std::cout << "O Source: " << this->Base->get_word() << std::endl;
 		this->sequence = Base->get_sequence(); //get sequence from base command
 		
+		int saved_stdin = dup(0);
+		int TEMP_I_INPUT = access("TEMP_I_TARGET", F_OK);
+		if (TEMP_I_INPUT == 0){ //if we already have existing input, also switch out our stdin
+		    close(0);
+		    open("TEMP_I_TARGET",O_RDWR);
+		}
+
 		//SET FILE TO BE NEW OUTPUT
 		int saved_stdout = dup(1);
 		close(1);
@@ -52,7 +59,9 @@ class O_Source: public Command { //LHS OF >
 		
 		//SET STDOUT TO OUTPUT AGAIN
 		dup2(saved_stdout,1);		
-
+		if (TEMP_I_INPUT == 0){
+		    dup2(saved_stdin,0);
+		}
 		//std::cout << "Reached end of Redirect!" << std::endl;
 		return result;
 
@@ -116,6 +125,7 @@ class I_Target: public Command { //LHS of <
 		if (runCount == 0){
 		    //std::cout << "first run" << std::endl;
 		    //create a temporay file and set that to be our temporary stdin fd.
+		    
 		    saved_stdin = dup(0);
 		    close(0);
 		    openFd = open("TEMP_I_TARGET",O_CREAT|O_RDWR|O_TRUNC,S_IRWXU); //create a new file called TEMP_I_TARGET. it's file descriptor is saved at 0
@@ -125,11 +135,12 @@ class I_Target: public Command { //LHS of <
 		} else {
 		    //std::cout << "next run" << std::endl;
 		    //since this isn't the first time the command is being called, it is assumed that our TEMP_I_TARGET has been written to.
+		
 		    std::string result = this->Base->execute();
 		    runCount = 0;
 		    dup2(saved_stdin,0);
 		    remove("TEMP_I_TARGET");	
-		    
+		    //std::cout << "ended" <<std::endl;
 		    //return result;
 		    return result;
 		}
@@ -169,15 +180,15 @@ class I_Source : public Command{ //RHS of <
 			
 		    input.close(); output.close();
 		} else {
-		    std::cout << "'" << FILEPATH << "' does not exist." << std::endl;
+		    //std::cout << "'" << FILEPATH << "' does not exist." << std::endl;
 		}
 
 		
 		//run execute. this is if something is both an I_Source or an O_target. we do know that this is a file so we disable it's allow_run
 		this->Base->set_run(false);
 		std::string result = this->Base->execute();
-
-		return result;
+		
+		return "16 4"; //prime the interpreter to call the command in the register. we don't need to return any new result information since this is a file.
 	}
 	void add_word(Word* new_word){this->Base->add_word(new_word);}
         void set_run(bool value){this->Base->set_run(value);}

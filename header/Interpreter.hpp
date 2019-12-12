@@ -19,6 +19,7 @@
 #include "InterpreterStrats/SingleCharStrat.hpp"
 #include "InterpreterStrats/Comment.hpp"
 #include "InterpreterStrats/Semicolon.hpp"
+#include "InterpreterStrats/Pipe.hpp"
 
 #include "InterpreterStrats/MultiCharStrat.hpp"
 #include "InterpreterStrats/Doublepipe.hpp"
@@ -26,6 +27,8 @@
 
 #include "InterpreterStrats/LooseCharStrat.hpp"
 #include "InterpreterStrats/IO_Redirect.hpp"
+
+#include "InterpreterStrats/StrictCharStrat.hpp"
 
 #include "InterpreterStrats/SpanStrat.hpp"
 #include "InterpreterStrats/Quotes.hpp"
@@ -36,6 +39,7 @@
 #include "Test.hpp"
 #include <boost/filesystem.hpp> //used for test  command
 #include "Redirect.hpp"
+#include "Pipe_Redirect.hpp"
 
 using namespace std;
 using namespace boost::filesystem;
@@ -62,13 +66,14 @@ class Interpreter {
 	std::vector<InterpreterStrat*> strats = {
 	    new Comment(new SingleCharStrat("#")),
 	    new Semicolon(new SingleCharStrat(";")),
-	    new Doublepipe(new MultiCharStrat("||")),
+	    new Doublepipe(new StrictCharStrat("||")),
 	    new Doubleamp(new MultiCharStrat("&&")),
 	    new Quotes(new SpanStrat("\"")),
 	    new Paren(new SpanStrat("()")),
 	    new Brackets(new SpanStrat("[]")),
 	    new O_Redirect(new LooseCharStrat(">>")),
-	    new I_Redirect(new SingleCharStrat("<"))
+	    new I_Redirect(new SingleCharStrat("<")),
+	    new Pipe(new SingleCharStrat("|")) //gonna use a different character for now for testing purposes
 	};
 
 
@@ -244,6 +249,10 @@ class Interpreter {
 			    decorator_ptr = new I_Source(dummy_ptr); 
 			} else if (decorator == "I_TARGET"){
 			    decorator_ptr = new I_Target(dummy_ptr);
+			} else if (decorator == "PIPE_START"){
+			    decorator_ptr = new Pipe_Start(dummy_ptr);
+			} else if (decorator == "PIPE_PIECE"){
+			    decorator_ptr = new Pipe_Piece(dummy_ptr);
 			}
 			
 			command_ptr = decorator_ptr; //point the command_ptr to the new decorator_ptr.
@@ -442,9 +451,9 @@ class Interpreter {
 		    //cout << "calling execute()" <<endl;
 		    
 		    this->InterpreterCall((*it)->execute()); //we use an interpreter call to set our PREVIOUS_EXECUTE now
-		    //run the command in the register if there is one. used for if the command should be ran again after the one after it
-		    if (WORD_REGISTER != nullptr){
-			WORD_REGISTER->execute();
+		    //run the command in the register when told to. used for if the command should be ran again after the one after it
+		    if (PREVIOUS_EXECUTE == 4){
+			this->InterpreterCall(WORD_REGISTER->execute());
 			WORD_REGISTER = nullptr; //reset register to nothing
 		    }
 		
@@ -469,6 +478,12 @@ class Interpreter {
 		    AVOID_EXECUTE = false;
 		}
 		//std::cout << "PREVIOUS_EXECUTE: " << PREVIOUS_EXECUTE << std::endl;
+	    }
+	    //checking for if word_register was left hanging
+	    if (WORD_REGISTER != nullptr){
+	        this->InterpreterCall(WORD_REGISTER->execute());
+		WORD_REGISTER = nullptr;
+		//std::cout << "something was left hanging" << std::endl;
 	    }
 	    for (auto strit = strats.begin(); strit != strats.end(); strit++){(*strit)->set_status(false);} //set all status of strats to false since we are done with the line
 	    //cout << "This sequence returns: " << PREVIOUS_EXECUTE << endl;
